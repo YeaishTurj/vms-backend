@@ -23,6 +23,16 @@
 hs_err_pid*
 replay_pid*
 
+# Environment & Secret Configuration
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.properties
+application-secret.yml
+application-secret.properties
+*.secret
+
 # Maven #
 target/
 pom.xml.tag
