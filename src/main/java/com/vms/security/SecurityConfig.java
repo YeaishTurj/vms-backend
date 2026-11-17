@@ -1,5 +1,6 @@
 package com.vms.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,6 +36,9 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
+    @Value("${cors.allowed-origins:http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://127.0.0.1:3000,https://*.netlify.app}")
+    private String allowedOrigins;
+
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                           JwtAccessDeniedHandler jwtAccessDeniedHandler) {
@@ -63,8 +67,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Allow public authentication endpoints
                         .requestMatchers("/auth/**", "/api/v1/auth/**").permitAll()
-                        // Allow database health check endpoint
-                        .requestMatchers("/api/v1/health", "/api/v1/health/**").permitAll()
+                        // Allow database health check endpoint (supports /api/v1/health and root /health)
+                        .requestMatchers("/api/v1/health", "/api/v1/health/**", "/health", "/health/**").permitAll()
                         // Protect all Vehicle fleet management endpoints
                         .requestMatchers("/vehicles/**", "/api/v1/vehicles/**").authenticated()
                         // All other endpoints require authentication
@@ -93,17 +97,18 @@ public class SecurityConfig {
     }
 
     /**
-     * CORS configuration source matching frontend origins.
+     * CORS configuration source matching frontend origins, supporting local development and Netlify domains.
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:8080",
-                "http://127.0.0.1:8080",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"
-        ));
+
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

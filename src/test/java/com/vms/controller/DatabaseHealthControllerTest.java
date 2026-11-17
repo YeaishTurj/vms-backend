@@ -19,9 +19,19 @@ class DatabaseHealthControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("Health endpoint returns UP and database CONNECTED")
+    @DisplayName("Health endpoint /api/v1/health returns UP and database CONNECTED")
     void testDatabaseHealthEndpoint() throws Exception {
         mockMvc.perform(get("/api/v1/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.service").value("vms-backend"))
+                .andExpect(jsonPath("$.database.status").value("CONNECTED"));
+    }
+
+    @Test
+    @DisplayName("Root health endpoint alias /health returns UP and database CONNECTED")
+    void testRootHealthEndpoint() throws Exception {
+        mockMvc.perform(get("/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.service").value("vms-backend"))

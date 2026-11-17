@@ -15,9 +15,10 @@ import java.util.Map;
 
 /**
  * Health check controller verifying backend availability and SQL database connectivity.
+ * Exposes both '/api/v1/health' and root '/health' for container/cloud platform probes (e.g. Render).
  */
 @RestController
-@RequestMapping("/api/v1/health")
+@RequestMapping({"/api/v1/health", "/health"})
 public class DatabaseHealthController {
 
     private final DataSource dataSource;
