@@ -211,6 +211,9 @@ vms-backend/
 - [x] Repository initialized with standard Git configuration on branch `main`.
 - [x] Comprehensive architectural specification and requirements documented.
 - [x] Planned technology stack and database schema documented.
-- [x] Planned REST API contract and validation rules established.
-- [ ] Application generation and Spring Boot scaffolding (Reserved for future development phase).
-- [ ] Controllers, entities, repositories, and database configuration (Reserved for future development phase).
+- [x] Spring Boot 3.4 foundation configured with Spring Data JPA, Validation, Web, and PostgreSQL.
+- [x] PostgreSQL relational database connection configured with secure environment-based variables.
+- [x] Vehicle Domain entity (`Vehicle`), repository (`VehicleRepository`), service (`VehicleService`), DTOs (`VehicleRequest`, `VehicleResponse`), and exception handling (`DuplicateVehicleNumberException`, `ResourceNotFoundException`) implemented.
+- [x] Database-level and service-level duplicate vehicle number uniqueness rules strictly enforced and verified.
+- [x] Unit test suite covering all vehicle lifecycle operations and duplicate checks passing (18/18 tests passing).
+- [ ] Vehicle REST Controllers & API Endpoints (Reserved for designated next phase).
