@@ -1,6 +1,10 @@
 spring:
   application:
     name: vms-backend
+  data:
+    web:
+      pageable:
+        page-serialization-mode: direct
   datasource:
     url: ${DB_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vms_db}}
     username: ${DB_USERNAME:${SPRING_DATASOURCE_USERNAME:postgres}}

@@ -14,6 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -238,6 +242,21 @@ class VehicleServiceTest {
     @Nested
     @DisplayName("Query & Delete Tests")
     class QueryAndDeleteTests {
+
+        @Test
+        @DisplayName("getVehicles returns paginated Page of VehicleResponse DTOs")
+        void getVehicles_shouldReturnPaginatedResponses() {
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Vehicle> vehiclePage = new PageImpl<>(List.of(sampleVehicle), pageable, 1);
+            when(vehicleRepository.findAll(pageable)).thenReturn(vehiclePage);
+
+            Page<VehicleResponse> result = vehicleService.getVehicles(pageable);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            assertThat(result.getContent().get(0).getVehicleNumber()).isEqualTo("XYZ-1234");
+        }
 
         @Test
         @DisplayName("getVehicleById returns matching DTO when vehicle exists")

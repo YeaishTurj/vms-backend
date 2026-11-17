@@ -6,6 +6,8 @@ import com.vms.entity.Vehicle;
 import com.vms.exception.DuplicateVehicleNumberException;
 import com.vms.exception.ResourceNotFoundException;
 import com.vms.repository.VehicleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,6 +106,18 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + id));
         return VehicleResponse.fromEntity(vehicle);
+    }
+
+    /**
+     * Retrieves a paginated list of vehicles mapped to response DTOs.
+     *
+     * @param pageable pagination and sorting parameters
+     * @return a Page of VehicleResponse DTOs
+     */
+    @Transactional(readOnly = true)
+    public Page<VehicleResponse> getVehicles(Pageable pageable) {
+        return vehicleRepository.findAll(pageable)
+                .map(VehicleResponse::fromEntity);
     }
 
     /**
