@@ -1,6 +1,105 @@
-# VMS Vehicle REST API Documentation
+# VMS REST API & Authentication Documentation
 
-Base Paths: `/vehicles` and `/api/v1/vehicles`
+Base URL: `http://localhost:8081`  
+Endpoints: `/auth`, `/api/v1/auth`, `/vehicles`, `/api/v1/vehicles`, `/api/v1/health`
+
+---
+
+## Authentication & Security Overview
+
+The backend uses **Spring Security 6** with **stateless JWT (JSON Web Token)** authentication using HMAC-SHA512/HMAC-SHA256 signature verification.
+- **Passwords:** Stored exclusively as salted hashes using `BCryptPasswordEncoder`. Passwords are never stored or logged in plain text and are excluded from all API response payloads (`@JsonIgnore`).
+- **Authorization:** Vehicle fleet endpoints (`/vehicles/**` and `/api/v1/vehicles/**`) require an `Authorization: Bearer <token>` header.
+- **Public Endpoints:** Authentication endpoints (`/auth/login`, `/api/v1/auth/login`), CORS preflight (`OPTIONS /**`), and health checks (`/api/v1/health`) are publicly accessible without tokens.
+- **Default System Accounts (Seeded via `DataInitializer`):**
+  - **Administrator:** `username: admin`, `password: admin123` (`ROLE_ADMIN`)
+  - **Standard User:** `username: user`, `password: user123` (`ROLE_USER`)
+
+---
+
+## Authentication Endpoints
+
+### 1. User Login
+
+- **Method:** `POST`
+- **Paths:** `/auth/login` or `/api/v1/auth/login`
+- **Authentication:** None (Public)
+- **Headers:** `Content-Type: application/json`
+- **Status Codes:**
+  - `200 OK`: Successful authentication, JWT issued.
+  - `400 Bad Request`: Validation failure (blank username/password).
+  - `401 Unauthorized`: Invalid username or password.
+
+#### Request Body
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+#### Response (`200 OK`)
+```json
+{
+  "token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzk0OTMzMDUyLCJleHAiOjE3OTUwMTk0NTJ9...",
+  "type": "Bearer",
+  "expiresIn": 86400,
+  "username": "admin",
+  "roles": [
+    "ROLE_ADMIN"
+  ]
+}
+```
+
+#### Error Response (`401 Unauthorized`)
+```json
+{
+  "timestamp": "2026-11-17T16:30:31.563Z",
+  "status": 401,
+  "error": "Unauthorized",
+  "message": "Invalid username or password"
+}
+```
+
+---
+
+### 2. Current User Profile
+
+- **Method:** `GET`
+- **Paths:** `/auth/me` or `/api/v1/auth/me`
+- **Authentication:** `Bearer <JWT_TOKEN>`
+- **Status Codes:**
+  - `200 OK`: Returns authenticated user's profile metadata.
+  - `401 Unauthorized`: Missing, expired, or invalid token.
+
+#### Response (`200 OK`)
+```json
+{
+  "id": 1,
+  "username": "admin",
+  "email": "admin@vms.corp",
+  "role": "ROLE_ADMIN"
+}
+```
+
+---
+
+## Protected Fleet Management Endpoints
+
+All endpoints below require the following HTTP header:
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+If this header is missing or contains an invalid/expired token, the server returns:
+```json
+{
+  "path": "/vehicles",
+  "error": "Unauthorized",
+  "message": "Full authentication is required to access this resource",
+  "timestamp": "2026-11-17T16:30:16.255Z",
+  "status": 401
+}
+```
 
 ---
 

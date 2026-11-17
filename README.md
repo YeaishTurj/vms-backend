@@ -33,6 +33,7 @@ The Vehicle Management System is designed as a decoupled, multi-repository archi
 | **Runtime Environment** | Java (JDK) | Java 21 LTS (or Java 17 LTS) |
 | **Application Framework** | Spring Boot | Spring Boot 3.x (Spring Framework 6.x) |
 | **REST & Web Services** | Spring Web | Spring MVC, Jackson (JSON serialization), Problem Details (RFC 7807) |
+| **Security & Authentication** | Spring Security & JJWT | Stateless JWT (HMAC-SHA512/SHA256), BCrypt password hashing, role-based authorization |
 | **Persistence / ORM** | Spring Data JPA | Hibernate 6.x, Spring Data Repositories |
 | **Database** | Relational SQL | PostgreSQL / MySQL / H2 (testing profile) |
 | **Data Validation** | Jakarta Validation | Hibernate Validator (`@NotNull`, `@NotBlank`, `@Size`, custom validators) |

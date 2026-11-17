@@ -39,8 +39,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.vms.security.CustomUserDetailsService;
+import com.vms.security.JwtAccessDeniedHandler;
+import com.vms.security.JwtAuthenticationEntryPoint;
+import com.vms.security.JwtAuthenticationFilter;
+import com.vms.security.JwtTokenProvider;
+import com.vms.security.SecurityConfig;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
+
 @WebMvcTest(VehicleController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({
+        SecurityConfig.class,
+        JwtAuthenticationFilter.class,
+        JwtAuthenticationEntryPoint.class,
+        JwtAccessDeniedHandler.class,
+        GlobalExceptionHandler.class
+})
+@WithMockUser
 class VehicleControllerTest {
 
     @Autowired
@@ -51,6 +67,12 @@ class VehicleControllerTest {
 
     @MockBean
     private VehicleService vehicleService;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
 
     private VehicleRequest validRequest;
     private VehicleResponse sampleResponse;
@@ -339,6 +361,44 @@ class VehicleControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status", is(404)))
                     .andExpect(jsonPath("$.error", is("Not Found")));
+        }
+    }
+
+    @Nested
+    @DisplayName("Endpoint Security Enforcement")
+    class EndpointSecurityTests {
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("GET /vehicles without authentication returns 401 Unauthorized")
+        void getVehicles_unauthenticated_shouldReturn401() throws Exception {
+            mockMvc.perform(get("/vehicles"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.status", is(401)))
+                    .andExpect(jsonPath("$.error", is("Unauthorized")))
+                    .andExpect(jsonPath("$.message", is("Full authentication is required to access this resource")));
+        }
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("POST /vehicles without authentication returns 401 Unauthorized")
+        void postVehicle_unauthenticated_shouldReturn401() throws Exception {
+            mockMvc.perform(post("/vehicles")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(validRequest)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.status", is(401)))
+                    .andExpect(jsonPath("$.error", is("Unauthorized")));
+        }
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("DELETE /vehicles/{id} without authentication returns 401 Unauthorized")
+        void deleteVehicle_unauthenticated_shouldReturn401() throws Exception {
+            mockMvc.perform(delete("/vehicles/1"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.status", is(401)))
+                    .andExpect(jsonPath("$.error", is("Unauthorized")));
         }
     }
 }

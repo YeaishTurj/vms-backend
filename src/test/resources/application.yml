@@ -18,3 +18,8 @@ spring:
 
 server:
   port: 0
+
+security:
+  jwt:
+    secret: vms-test-secure-secret-key-for-jwt-signing-must-be-at-least-256-bits-long-2026
+    expiration-ms: 3600000 # 1 hour for testing

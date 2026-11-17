@@ -21,3 +21,8 @@ spring:
 
 server:
   port: ${PORT:8081}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:vms-super-secure-secret-key-for-jwt-signing-must-be-at-least-256-bits-long-2026}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours in milliseconds
